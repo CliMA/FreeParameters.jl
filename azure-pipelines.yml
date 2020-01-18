@@ -50,7 +50,7 @@ jobs:
                                                                    slug         = @show(ENV["BUILD_REPOSITORY_NAME"]),
                                                                    build        = @show(ENV["BUILD_BUILDID"]))'
     env:
-      CODECOV_TOKEN: "e62dc66d-04f1-424f-9c4d-1278fa8b2e8d"
+      CODECOV_TOKEN: "91f35755-8737-4cf4-b7e8-f1cd902bedce"
     displayName: 'Submit code coverage'
 
 - job: macOS
