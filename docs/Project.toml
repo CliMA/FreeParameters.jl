@@ -1,4 +1,5 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 FreeParameters = "c2bd907f-6643-4f95-bba2-6fb2889bb36c"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
