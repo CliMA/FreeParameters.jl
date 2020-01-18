@@ -2,9 +2,12 @@
 
 Infrastructure for annotating, collecting, and distributing free parameters.
 
-| **Documentation**                             | **Build Status**                                                        | Bors                                  |
-|:--------------------------------------------- |:------------------------------------------------------------------------|---------------------------------------|
-| [![latest][docs-latest-img]][docs-latest-url] | [![azure][azure-img]][azure-url] [![codecov][codecov-img]][codecov-url] | [![Bors enabled][bors-img]][bors-url] |
+|||
+|---------------------:|:----------------------------------------------|
+| **Documentation**    | [![latest][docs-latest-img]][docs-latest-url] |
+| **Azure Build**      | [![azure][azure-img]][azure-url]              |
+| **Code Coverage**    | [![codecov][codecov-img]][codecov-url]        |
+| **Bors**             | [![Bors enabled][bors-img]][bors-url]         |
 
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
 [docs-latest-url]: https://climate-machine.github.io/FreeParameters.jl/latest/
