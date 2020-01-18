@@ -16,5 +16,5 @@ Infrastructure for annotating, collecting, and distributing free parameters.
 [codecov-url]: https://codecov.io/gh/climate-machine/FreeParameters.jl
 
 [bors-img]: https://bors.tech/images/badge_small.svg
-[bors-url]: https://app.bors.tech/repositories/20449
+[bors-url]: https://app.bors.tech/repositories/22860
 
