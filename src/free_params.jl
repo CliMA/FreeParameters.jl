@@ -1,7 +1,14 @@
 export FreeParameter
 export extract_free_parameters
 
-mutable struct FreeParameter{T}
+"""
+    AbstractFreeParameter{T}
+
+Abstract free parameter with type `T`
+"""
+abstract type AbstractFreeParameter{T} end
+
+mutable struct FreeParameter{T} <: AbstractFreeParameter{T}
   val::T
   hi::T
   lo::T
