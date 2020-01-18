@@ -41,6 +41,12 @@ returned value be the default value used.
 """
 (fp::FreeParameter)() = fp.default_value
 
+"""
+    extract_free_parameters!(fp::Vector{FreeParameter}, s)
+
+Recursively extract a vector of `FreeParameter`'s
+from the struct `s`.
+"""
 function extract_free_parameters!(fp::Vector{FreeParameter}, s)
   for fn in fieldnames(typeof(s))
     p = getproperty(s,fn)
