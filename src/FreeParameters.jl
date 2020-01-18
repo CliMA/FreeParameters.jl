@@ -1,5 +1,7 @@
 module FreeParameters
 
+using Distributions
+
 export flatten!, flatten, unflatten, @parameters
 
 include("free_params.jl")

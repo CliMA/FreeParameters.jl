@@ -1,5 +1,6 @@
 using Test
 using FreeParameters
+using Distributions
 
 const ∞ =  Inf
 
@@ -21,7 +22,12 @@ const ∞ =  Inf
 
 end
 
-@testset "FreeParameters" begin
+@testset "Constructor" begin
+  fp = FreeParameter(5.0)
+  @test fp() ≈ 5.0 # passes
+end
+
+@testset "Extract parameters" begin
 
   mutable struct Bar{FT}
     c::FreeParameter{FT}
@@ -34,19 +40,15 @@ end
   end
 
   FT = Float64
-  b = Bar{FT}(FreeParameter{FT}(5.0, 0.0, 10.0), 10.0)
-  f = Foo(FreeParameter{FT}(2.0, 0.0, 10.0), b)
+  b = Bar{FT}(FreeParameter(1.0), 2.0)
+  f = Foo(FreeParameter(3.0), b)
 
   fp = extract_free_parameters(f)
-  fp[1].val = 3.0
-  fp[2].val = 30.0
+  @test fp[1]() ≈ 3.0
+  @test fp[2]() ≈ 1.0
 
-  # f is now updated
-  @test f.a.val ≈ 3.0
-  @test f.a.hi ≈ 0.0
-  @test f.a.lo ≈ 10.0
-  @test f.b.c.val ≈ 30.0
-  @test f.b.c.hi ≈ 0.0
-  @test f.b.c.lo ≈ 10.0
+  # # f is now updated
+  @test f.a() ≈ 3.0
+  @test f.b.c() ≈ 1.0
 
 end
