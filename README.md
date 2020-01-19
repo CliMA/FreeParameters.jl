@@ -12,8 +12,8 @@ Infrastructure for annotating, collecting, and distributing free parameters.
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://climate-machine.github.io/FreeParameters.jl/stable/
 
-[azure-img]: https://stable.azure.com/climate-machine/FreeParameters.jl/_apis/build/status/climate-machine.FreeParameters.jl?branchName=master
-[azure-url]: https://stable.azure.com/climate-machine/FreeParameters.jl/_build/latest?definitionId=1&branchName=master
+[azure-img]: https://dev.azure.com/climate-machine/FreeParameters.jl/_apis/build/status/climate-machine.FreeParameters.jl?branchName=master
+[azure-url]: https://dev.azure.com/climate-machine/FreeParameters.jl/_build/latest?definitionId=1&branchName=master
 
 [codecov-img]: https://codecov.io/gh/climate-machine/FreeParameters.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/climate-machine/FreeParameters.jl
