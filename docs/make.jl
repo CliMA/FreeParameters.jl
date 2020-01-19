@@ -4,6 +4,7 @@ makedocs(
   sitename = "FreeParameters.jl",
   doctest = false,
   strict = false,
+  devurl = "stable",
   format = Documenter.HTML(
         prettyurls = get(ENV, "CI", nothing) == "true",
         mathengine = MathJax(Dict(
