@@ -1,48 +1,55 @@
 export FreeParameter
 export extract_free_parameters
 
-"""
-    AbstractFreeParameter{T}
-
-Abstract free parameter with type `T` and prior `P`
-"""
-abstract type AbstractFreeParameter{T,P} end
+const FPTYPES = Real
 
 """
-    FreeParameter{T,P} <: AbstractFreeParameter{T,P}
+    FreeParameterValOnly{T,P,B} <: FPTYPES
 
-Free parameter
+Free parameter of type `T`, with prior `P`, and bounds `B`.
 """
-mutable struct FreeParameter{T,P} <: AbstractFreeParameter{T,P}
+struct FreeParameterValOnly{T,P,B} <: FPTYPES
   "Value used in the model"
-  val_used::T
+  val::T
+  function FreeParameterValOnly(val::T,
+                         P=Nothing,
+                         B=Nothing
+                         ) where {T}
+    return new{T,P,B}(val)
+  end
+end
+
+"""
+    FreeParameterValOnly{T,P,B} <: FPTYPES
+
+Free parameter of type `T` and prior `P`.
+"""
+struct FreeParameter{T,P} <: FPTYPES
+  "Value used in the model"
+  val::T
   "prior distribution"
   prior::Union{P,Nothing}
   "bounds on value used"
   bounds::Union{Tuple{T,T},Nothing}
-  function FreeParameter(val_used::T,
-                         prior::P=nothing,
-                         bounds=nothing
+  function FreeParameter(val::T,
+                         prior::Union{P,Nothing}=nothing,
+                         bounds::Union{Tuple{T,T},Nothing}=nothing
                          ) where {T,P}
-    return new{T,P}(val_used, prior, bounds)
+    return new{T,typeof(prior)}(val, prior, bounds)
   end
 end
 
+Base.promote(x::T, fp::FreeParameter) where {T} = Base.promote(x, fp.val)
+Base.promote(fp::FreeParameter, x::T) where {T} = Base.promote(fp.val, x)
 
-"""
-    (fp::FreeParameter)()
-
-If a free parameter is called as a function, let the
-returned value be the default value used.
-
-# Example
-
-```julia
-  fp = FreeParameter{Float64}(5.0)
-  @test fp() ≈ 5.0 # passes
-```
-"""
-(fp::FreeParameter)() = fp.val_used
+Base.:+(x::FreeParameter, y::FPTYPES) = +(promote(x,y)...)
+Base.:-(x::FreeParameter, y::FPTYPES) = -(promote(x,y)...)
+Base.:*(x::FreeParameter, y::FPTYPES) = *(promote(x,y)...)
+Base.:/(x::FreeParameter, y::FPTYPES) = /(promote(x,y)...)
+Base.:+(x::FPTYPES, y::FreeParameter) = +(promote(x,y)...)
+Base.:-(x::FPTYPES, y::FreeParameter) = -(promote(x,y)...)
+Base.:*(x::FPTYPES, y::FreeParameter) = *(promote(x,y)...)
+Base.:/(x::FPTYPES, y::FreeParameter) = /(promote(x,y)...)
 
 """
     extract_free_parameters!(fp::Vector{FreeParameter}, s)

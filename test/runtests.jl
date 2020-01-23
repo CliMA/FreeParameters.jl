@@ -22,9 +22,10 @@ const ∞ =  Inf
 
 end
 
-@testset "Constructor" begin
+@testset "Constructor / promote" begin
   fp = FreeParameter(5.0)
-  @test fp() ≈ 5.0 # passes
+  @show promote(1,fp)
+  @show promote(fp,1)
 end
 
 @testset "Extract parameters" begin
@@ -44,11 +45,11 @@ end
   f = Foo(FreeParameter(3.0), b)
 
   fp = extract_free_parameters(f)
-  @test fp[1]() ≈ 3.0
-  @test fp[2]() ≈ 1.0
+  @test fp[1] + 1.0 ≈ fp[1].val + 1.0
+  @test fp[2] + 1.0 ≈ fp[2].val + 1.0
 
   # # f is now updated
-  @test f.a() ≈ 3.0
-  @test f.b.c() ≈ 1.0
+  @test f.a + 1.0 ≈ f.a.val + 1.0
+  @test f.b.c + 1.0 ≈ f.b.c.val + 1.0
 
 end
