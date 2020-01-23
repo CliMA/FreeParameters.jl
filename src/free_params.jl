@@ -14,14 +14,17 @@ abstract type AbstractFreeParameter{T,P} end
 Free parameter
 """
 mutable struct FreeParameter{T,P} <: AbstractFreeParameter{T,P}
-  "Default value"
-  default_value::T
+  "Value used in the model"
+  val_used::T
   "prior distribution"
-  prior::P
-  function FreeParameter(default_value::T,
-                         prior::P=Normal(default_value)
+  prior::Union{P,Nothing}
+  "bounds on value used"
+  bounds::Union{Tuple{T,T},Nothing}
+  function FreeParameter(val_used::T,
+                         prior::P=nothing,
+                         bounds=nothing
                          ) where {T,P}
-    return new{T,P}(default_value, prior)
+    return new{T,P}(val_used, prior, bounds)
   end
 end
 
@@ -39,7 +42,7 @@ returned value be the default value used.
   @test fp() ≈ 5.0 # passes
 ```
 """
-(fp::FreeParameter)() = fp.default_value
+(fp::FreeParameter)() = fp.val_used
 
 """
     extract_free_parameters!(fp::Vector{FreeParameter}, s)

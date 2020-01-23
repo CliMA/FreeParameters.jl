@@ -4,13 +4,13 @@ Infrastructure for annotating, collecting, and distributing free parameters.
 
 |||
 |---------------------:|:----------------------------------------------|
-| **Documentation**    | [![stable][docs-stable-img]][docs-stable-url] |
+| **Documentation**    | [![dev][docs-dev-img]][docs-dev-url]          |
 | **Azure Build**      | [![azure][azure-img]][azure-url]              |
 | **Code Coverage**    | [![codecov][codecov-img]][codecov-url]        |
 | **Bors**             | [![Bors enabled][bors-img]][bors-url]         |
 
-[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://climate-machine.github.io/FreeParameters.jl/stable/
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://climate-machine.github.io/FreeParameters.jl/dev/
 
 [azure-img]: https://dev.azure.com/climate-machine/FreeParameters.jl/_apis/build/status/climate-machine.FreeParameters.jl?branchName=master
 [azure-url]: https://dev.azure.com/climate-machine/FreeParameters.jl/_build/latest?definitionId=1&branchName=master
