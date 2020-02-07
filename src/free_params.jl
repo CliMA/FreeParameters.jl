@@ -4,38 +4,22 @@ export extract_free_parameters
 const FPTYPES = Real
 
 """
-    FreeParameterValOnly{T,P,B} <: FPTYPES
-
-Free parameter of type `T`, with prior `P`, and bounds `B`.
-"""
-struct FreeParameterValOnly{T,P,B} <: FPTYPES
-  "Value used in the model"
-  val::T
-  function FreeParameterValOnly(val::T,
-                         P=Nothing,
-                         B=Nothing
-                         ) where {T}
-    return new{T,P,B}(val)
-  end
-end
-
-"""
-    FreeParameterValOnly{T,P,B} <: FPTYPES
+    FreeParameter{T,P,B} <: FPTYPES
 
 Free parameter of type `T` and prior `P`.
 """
-struct FreeParameter{T,P} <: FPTYPES
+struct FreeParameter{T,P,B} <: FPTYPES
   "Value used in the model"
   val::T
   "prior distribution"
-  prior::Union{P,Nothing}
+  prior::P
   "bounds on value used"
-  bounds::Union{Tuple{T,T},Nothing}
+  bounds::B
   function FreeParameter(val::T,
-                         prior::Union{P,Nothing}=nothing,
-                         bounds::Union{Tuple{T,T},Nothing}=nothing
-                         ) where {T,P}
-    return new{T,typeof(prior)}(val, prior, bounds)
+                         prior::P=nothing,
+                         bounds::B=nothing
+                         ) where {T,P,B}
+    return new{T,P,B}(val, prior, bounds)
   end
 end
 
