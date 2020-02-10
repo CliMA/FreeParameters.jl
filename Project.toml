@@ -1,7 +1,7 @@
 name = "FreeParameters"
 uuid = "c2bd907f-6643-4f95-bba2-6fb2889bb36c"
 authors = ["Charles Kawczynski <kawczynski.charles@gmail.com>"]
-version = "0.1.1"
+version = "0.2.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -10,4 +10,5 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Distributions = "0.22.4"
+SyntaxTree = "1.0.1"
 julia = "1.0"
