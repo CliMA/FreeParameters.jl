@@ -76,7 +76,6 @@ struct Foo{FT,I}
   x::FT
   a::Bar{FT,I}
 end
-FT = Float64
 m = Foo(3.0, Bar(1.0, 2))
 end
 
@@ -111,12 +110,12 @@ new_params_val = 10.0
 update_free_parameters!(fp, new_params_val)
 
 # Get parametric version of updated generic model
-gmodel_new = parametric_type(Model, pmodel, gmodel)
+pmodel_new = parametric_type(Model, pmodel, gmodel)
 
 # Test model is updated
-@test gmodel_new.x   ≈  new_params_val
-@test gmodel_new.a.x ≈  new_params_val
-@test gmodel_new.a.i == new_params_val
+@test pmodel_new.x   ≈  new_params_val
+@test pmodel_new.a.x ≈  new_params_val
+@test pmodel_new.a.i == new_params_val
 
 ```
 
