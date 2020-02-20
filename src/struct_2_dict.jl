@@ -16,16 +16,16 @@ function add_leaves!(D_full::Dict,
                      stop_recursion_type,
                      filter_type,
                      _parent=Any) where {S,T,F<:Function}
-  if !(_parent isa stop_recursion_type)
-    subname = string(FreeParameters.strip_type(T))
-    name = _fullname == "" ? subname : _fullname*"."*subname
-    D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
-    filter!(x-> is_leaf(x.second), D)
-    if s isa filter_type
-      for (k,v) in D
-        D_full[name*"."*string(k)] = v
-      end
+  subname = string(FreeParameters.strip_type(T))
+  name = _fullname == "" ? subname : _fullname*"."*subname
+  D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
+  filter!(x-> is_leaf(x.second), D)
+  if s isa filter_type
+    for (k,v) in D
+      D_full[name*"."*string(k)] = v
     end
+  end
+  if !(s isa stop_recursion_type)
     for fn in fieldnames(T)
       prop = getproperty(s, fn)
       if !isbits(prop) && !is_leaf(prop)

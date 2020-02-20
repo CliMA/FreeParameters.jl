@@ -8,12 +8,14 @@ fext = ".yml"
   for (k,v) in D_EntireStruct
     println("D_EntireStruct[$k] = $v")
   end
+  @test !isempty(D_EntireStruct)
+
   D_FreeParametersOnly = struct_2_dict(gmodel, FreeParametersOnly())
   for (k,v) in D_FreeParametersOnly
     println("D_FreeParametersOnly[$k] = $v")
   end
-  write_data(D_EntireStruct, "parameters")
-  @test 1==1
+  # write_data(D_EntireStruct, "parameters")
+  @test isempty(D_FreeParametersOnly)
 end
 
 @testset "Struct 2 dict: with free parameters" begin
@@ -23,18 +25,24 @@ end
   @FreeParameter(gmodel.x, Distributions.Normal)
   @FreeParameter(gmodel.a.x)
   # @FreeParameter(gmodel.a.i)
-  @test 1==1
 
   D_EntireStruct = struct_2_dict(gmodel, EntireStruct())
   for (k,v) in D_EntireStruct
     println("D_EntireStruct[$k] = $v")
   end
-  @test 1==1
+  @test !isempty(D_EntireStruct)
+  @test haskey(D_EntireStruct, "Foo.x")
+  @test haskey(D_EntireStruct, "Foo.a.x")
+  @test haskey(D_EntireStruct, "Foo.a.i")
+
   D_FreeParametersOnly = struct_2_dict(gmodel, FreeParametersOnly())
-  @test 1==1
   for (k,v) in D_FreeParametersOnly
     println("D_FreeParametersOnly[$k] = $v")
   end
-  write_data(D_EntireStruct, "parameters")
+  # write_data(D_EntireStruct, "parameters")
+  @test !isempty(D_FreeParametersOnly)
+  @test haskey(D_FreeParametersOnly, "Foo.x")
+  @test haskey(D_FreeParametersOnly, "Foo.a.x")
+  @test !haskey(D_FreeParametersOnly, "Foo.a.i")
 end
 

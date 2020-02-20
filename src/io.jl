@@ -60,16 +60,16 @@ function export_struct(s::T,
                        stop_recursion_type,
                        filter_type,
                        _parent=Any) where {S,T,F<:Function}
+  subdir = string(FreeParameters.strip_type(T))
+  dir = joinpath(directory, subdir)
+  params = joinpath(dir, "params")
+  mkpath(dir)
+  D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
+  filter!(x-> is_leaf(x.second), D)
+  if s isa filter_type
+    !isempty(D) && write_data(D, params)
+  end
   if !(_parent isa stop_recursion_type)
-    subdir = string(FreeParameters.strip_type(T))
-    dir = joinpath(directory, subdir)
-    params = joinpath(dir, "params")
-    mkpath(dir)
-    D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
-    filter!(x-> is_leaf(x.second), D)
-    if s isa filter_type
-      !isempty(D) && write_data(D, params)
-    end
     for fn in fieldnames(T)
       prop = getproperty(s, fn)
       if !isbits(prop) && !is_leaf(prop)
@@ -91,19 +91,19 @@ function import_struct!(s::T,
                         stop_recursion_type,
                         filter_type,
                         _parent=Any) where {S,T,F<:Function}
-  if !(_parent isa stop_recursion_type)
-    subdir = string(FreeParameters.strip_type(T))
-    dir = joinpath(directory, subdir)
-    params = joinpath(dir, "params")
-    D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
-    filter!(p -> is_leaf(p.second), D)
-    if !isempty(D)
-      read_data!(D, params)
-      for fn in fieldnames(T)
-        prop = getproperty(s, fn)
-        is_leaf(prop) && setproperty!(s, fn, D[fn])
-      end
+  subdir = string(FreeParameters.strip_type(T))
+  dir = joinpath(directory, subdir)
+  params = joinpath(dir, "params")
+  D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
+  filter!(p -> is_leaf(p.second), D)
+  if !isempty(D)
+    read_data!(D, params)
+    for fn in fieldnames(T)
+      prop = getproperty(s, fn)
+      is_leaf(prop) && setproperty!(s, fn, D[fn])
     end
+  end
+  if !(_parent isa stop_recursion_type)
     for fn in fieldnames(T)
       prop = getproperty(s, fn)
       if !isbits(prop)
