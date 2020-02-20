@@ -4,9 +4,11 @@
 
 export export_struct, import_struct!
 export EntireStruct, FreeParametersOnly
+export write_data
 
-struct EntireStruct end
-struct FreeParametersOnly end
+abstract type ExportType end
+struct EntireStruct <: ExportType end
+struct FreeParametersOnly <: ExportType end
 
 using JSON
 
@@ -33,29 +35,46 @@ function read_data!(data::T, filename::S) where {S,T}
   return nothing
 end
 
-export_struct(s::T, directory::S, ::EntireStruct) where {S,T,F} = export_struct(s, directory, x -> isbits(x))
-export_struct(s::T, directory::S, ::FreeParametersOnly) where {S,T,F} = export_struct(s, directory, x -> x isa FreeParameter)
-import_struct!(s::T, directory::S, ::EntireStruct) where {S,T,F} = import_struct!(s, directory, x -> isbits(x))
-import_struct!(s::T, directory::S, ::FreeParametersOnly) where {S,T,F} = import_struct!(s, directory, x -> x isa FreeParameter)
+leaf_filter(::EntireStruct) = x -> isbits(x)
+leaf_filter(::FreeParametersOnly) = x -> x isa FreeParameter
+
+function export_struct(s::T, directory::S, et::ExportType, stop_recursion_type, filter_type) where {S,T,F<:Function}
+  return export_struct(s, directory, leaf_filter(et), stop_recursion_type=FreeParameter, filter_type=Any)
+end
+function import_struct!(s::T, directory::S, et::ExportType, stop_recursion_type, filter_type) where {S,T,F<:Function}
+  return import_struct!(s, directory, leaf_filter(et), stop_recursion_type=FreeParameter, filter_type=Any)
+end
 
 """
     export_struct(s::T, directory::S) where {S,T}
 
 Export struct `s` to directory `directory`
 with the same structure as `s`.
+
+ - `stop_recursion_type` stop recursion when reaching type `stop_recursion_type`
+ - `filter_type` only export type `filter_type`
 """
-function export_struct(s::T, directory::S, cond::F) where {S,T,F}
-  subdir = string(FreeParameters.strip_type(T))
-  dir = joinpath(directory, subdir)
-  params = joinpath(dir, "params")
-  mkpath(dir)
-  D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
-  filter!(x-> cond(x.second), D)
-  !isempty(D) && write_data(D, params)
-  for fn in fieldnames(T)
-    prop = getproperty(s, fn)
-    if !isbits(prop) && ! cond(prop)
-      export_struct(prop, dir, cond)
+function export_struct(s::T,
+                       directory::S,
+                       is_leaf::F,
+                       stop_recursion_type,
+                       filter_type,
+                       _parent=Any) where {S,T,F<:Function}
+  if !(_parent isa stop_recursion_type)
+    subdir = string(FreeParameters.strip_type(T))
+    dir = joinpath(directory, subdir)
+    params = joinpath(dir, "params")
+    mkpath(dir)
+    D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
+    filter!(x-> is_leaf(x.second), D)
+    if s isa filter_type
+      !isempty(D) && write_data(D, params)
+    end
+    for fn in fieldnames(T)
+      prop = getproperty(s, fn)
+      if !isbits(prop) && !is_leaf(prop)
+        export_struct(prop, dir, is_leaf, stop_recursion_type, filter_type, _parent)
+      end
     end
   end
 end
@@ -66,23 +85,30 @@ end
 Import struct `s` to directory `directory`
 with the same structure as `s`.
 """
-function import_struct!(s::T, directory::S, cond::F) where {S,T,F}
-  subdir = string(FreeParameters.strip_type(T))
-  dir = joinpath(directory, subdir)
-  params = joinpath(dir, "params")
-  D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
-  filter!(p -> cond(p.second), D)
-  if !isempty(D)
-    read_data!(D, params)
+function import_struct!(s::T,
+                        directory::S,
+                        is_leaf::F,
+                        stop_recursion_type,
+                        filter_type,
+                        _parent=Any) where {S,T,F<:Function}
+  if !(_parent isa stop_recursion_type)
+    subdir = string(FreeParameters.strip_type(T))
+    dir = joinpath(directory, subdir)
+    params = joinpath(dir, "params")
+    D = Dict( [fn => getproperty(s, fn) for fn in fieldnames(T)] )
+    filter!(p -> is_leaf(p.second), D)
+    if !isempty(D)
+      read_data!(D, params)
+      for fn in fieldnames(T)
+        prop = getproperty(s, fn)
+        is_leaf(prop) && setproperty!(s, fn, D[fn])
+      end
+    end
     for fn in fieldnames(T)
       prop = getproperty(s, fn)
-      cond(prop) && setproperty!(s, fn, D[fn])
-    end
-  end
-  for fn in fieldnames(T)
-    prop = getproperty(s, fn)
-    if !isbits(prop)
-      import_struct!(prop, dir, cond)
+      if !isbits(prop)
+        import_struct!(prop, dir, is_leaf, stop_recursion_type, filter_type, _parent)
+      end
     end
   end
 end

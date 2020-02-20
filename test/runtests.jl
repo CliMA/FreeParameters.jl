@@ -2,7 +2,8 @@ using Test
 using FreeParameters
 using Distributions
 
-include("macro.jl")
+# include("macro.jl")
 include("define_model.jl")
-include("generic_struct.jl")
-include("io.jl")
+# include("generic_struct.jl")
+# include("io.jl")
+include("struct_2_dict.jl")

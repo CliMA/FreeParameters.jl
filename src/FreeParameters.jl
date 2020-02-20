@@ -9,5 +9,6 @@ include("flatten.jl")
 include("domains.jl")
 include("macro.jl")
 include("io.jl")
+include("struct_2_dict.jl")
 
 end
