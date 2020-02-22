@@ -9,6 +9,9 @@ include("flatten.jl")
 include("domains.jl")
 include("macro.jl")
 include("io.jl")
-include("struct_2_dict.jl")
+include("export_folders.jl")
+include("import_folders.jl")
+include("export_single_file.jl")
+include("import_single_file.jl")
 
 end
