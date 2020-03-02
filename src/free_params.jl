@@ -1,10 +1,11 @@
 using SyntaxTree
+using StaticArrays
 
 export FreeParameter, @FreeParameter
+export extract_free_parameters
 
-export generic_type,
-       extract_free_parameters,
-       parametric_type
+export ExcludeTypes, IncludeTypes
+export EntireStruct, FreeParametersOnly
 
 const FPTYPES = Real
 
@@ -57,110 +58,6 @@ function extract_free_parameters(s)
 end
 
 #####
-##### Generating generic data structures
-#####
-
-"""
-    get_type(s, fns)
-
-Expression of definition of
-struct `s` with fieldnames `fns`
-"""
-function get_type(s, fns)
-  expr = quote mutable struct $(s) end end
-  a = expr.args[2].args[3].args
-  for fn in fns
-    push!(a, fn, LineNumberNode)
-  end
-  return expr
-end
-
-"""
-    strip_type(T)
-
-Removes, for example, `Main.MyMod` from `Main.MyMod.Foo`
-
-# TODO: must be a better way, AST?
-"""
-strip_type(T) = Symbol(last(split(string(Symbol(T)),".")))
-
-"""
-    define_type(_module::Module, Tname, fns)
-
-Define struct `s` with fieldnames `fns`
-in module `_module`.
-"""
-function define_type(_module::Module, Tname, fns)
-  s_mod = strip_type(Tname) # remove prepending module
-  e = get_type(s_mod, fns)
-  _module.eval(e.args[2])
-end
-
-"""
-    define_generic_type(_module::Module, s::T) where {T}
-
-Define struct `s` in module `_module`
-_without_ parameters.
-"""
-function define_generic_type(_module::Module, s::T) where {T}
-  if !isprimitivetype(T)
-    fns = fieldnames(T)
-    define_type(_module, T.name, fns)
-    for fn in fns
-      prop = getproperty(s, fn)
-      define_generic_type(_module, prop)
-    end
-  end
-  return nothing
-end
-
-"""
-    get_type_instance(T, fields; strip_module=true)
-
-Expression of instance of type `T` with fields `fields`
-"""
-function get_type_instance(T, fields; strip_module=true)
-  T_mod = T
-  strip_module && (T_mod = strip_type(T)) # remove prepending module
-  expr = quote $(T_mod)() end |> SyntaxTree.linefilter!
-  a = expr.args[1].args
-  for field in fields
-    push!(a, field)
-  end
-  return expr
-end
-
-"""
-    _generic_type(_module::Module, s::T) where {T}
-
-Instance of generic struct in module
-`_module` that matches the structure
-of the parametric struct `s`.
-"""
-function _generic_type(_module::Module, s::T) where {T}
-  if !isprimitivetype(T)
-    fns = fieldnames(T)
-    props = [_generic_type(_module, prop) for prop in getproperty.(Ref(s), fns)]
-    e = get_type_instance(T.name, props)
-    return _module.eval(e)
-  else
-    return s
-  end
-end
-
-"""
-    generic_type(_module::Module, s)
-
-Define and instantiate generic struct in
-module `_module` that matches the structure
-of the parametric struct `s`.
-"""
-function generic_type(_module::Module, s)
-  define_generic_type(_module, s)
-  return _generic_type(_module, s)
-end
-
-#####
 ##### Annotating free parameters
 #####
 
@@ -169,68 +66,95 @@ macro FreeParameter(s, prior=nothing, bounds=nothing)
   return :($(esc(e)))
 end
 
-#####
-##### Generating parametric data structures
-#####
+"""
 
 """
-    get_val(x)
-
-Gets value of `FreeParameter`,
-otherwise return identity.
-"""
-function get_val end
-get_val(x) = x
-get_val(x::FreeParameter) = x.val
+abstract type AbstractFilterTypes end
+abstract type AbstractIncludeTypes <: AbstractFilterTypes end
+abstract type AbstractExcludeTypes <: AbstractFilterTypes end
 
 """
-    map_struct_recursive!(f::F, s::T) where {T,F}
+    IncludeTypes <: AbstractIncludeTypes
 
-Apply function `f` to properties
-of mutable struct `s` recursively.
-
-If `T isa FreeParameter`, skip to avoid
-assumptions on its properties.
+Types to include in
+ - converting a struct to dict
+ - exporting a dict
+ - importing a dict
 """
-function map_struct_recursive!(f::F, s::T) where {F,T}
-  for fn in fieldnames(T)
-    prop = getproperty(s, fn)
-    setproperty!(s, fn, f(prop))
-    map_struct_recursive!(f, prop)
-  end
+struct IncludeTypes <: AbstractIncludeTypes
+  include_types
+  stop_recursion_types
 end
-map_struct_recursive!(f::F, s::T) where {F,T<:FreeParameter} = nothing
-
+IncludeTypes(include_types) = IncludeTypes(include_types, (FreeParameter,))
 
 """
-    _parametric_type(_module::Module, s::T, sg::TG) where {T,TG}
+    FreeParametersOnly
 
-Instance of parametric type `T`, defined in module
-`_module`, from generic struct `sg`.
+Convenience constructor for including only free parameters
 """
-function _parametric_type(_module::Module, s::T, sg::TG) where {T,TG}
-  if !isprimitivetype(T)
-    props_old = getproperty.(Ref(s), fieldnames(T))
-    gprops = getproperty.(Ref(sg), fieldnames(TG))
-    Z = zip(props_old, gprops)
-    props_new = [_parametric_type(_module, prop, gprop) for (prop,gprop) in Z]
-    e = get_type_instance(T,props_new;strip_module=false)
-    return _module.eval(e)
-  else
-    return sg
-  end
+FreeParametersOnly() = IncludeTypes((FreeParameter,), (FreeParameter,))
+
+"""
+    ExcludeTypes <: AbstractExcludeTypes
+
+Types to exclude in
+ - converting a struct to dict
+ - exporting a dict
+ - importing a dict
+"""
+struct ExcludeTypes <: AbstractExcludeTypes
+  exlude_types
+  stop_recursion_types
+end
+ExcludeTypes(exlude_types) = ExcludeTypes(exlude_types, (FreeParameter,))
+
+"""
+    EntireStruct
+
+Convenience constructor for including entire struct/dict etc.
+"""
+EntireStruct() = ExcludeTypes((Any,), (FreeParameter,))
+
+struct isleaf{B}
+  custom::B
+  emptyfieldnames::B
+  isa_stop_recursion_type::B
+  isa_SArray::B
+  isa_isbits::B
+  isa_tuple::B
 end
 
-"""
-    parametric_type(_module::Module, s::T, sg::TG) where {T,TG}
+Base.any(il::isleaf) = any([il.custom && il.emptyfieldnames,
+                            il.isa_stop_recursion_type,
+                            il.isa_SArray
+                            ])
 
-Instance of parametric type `T`, defined in module
-`_module`, from generic struct `sg`.
+leaf_filter(ets::ExcludeTypes) = x -> isbits(x)
+leaf_filter(its::IncludeTypes) = x -> any([x isa t for t in its.include_types])
 
-First, get values from `FreeParameter`'s.
-"""
-function parametric_type(_module::Module, s::T, sg::TG) where {T,TG}
-  tmp = deepcopy(sg)
-  map_struct_recursive!(get_val, tmp)
-  return _parametric_type(_module, s, tmp)
+function __is_leaf_old(s, prop, is_leaf_custom, ft::AbstractFilterTypes)
+  C0 = is_leaf_custom(prop)
+  C2 = (prop isa ft.stop_recursion_types[1])
+  return (C0,C2)
+end
+
+function __is_leaf(s, prop, is_leaf_custom, ft::AbstractFilterTypes)
+  C9 = isbits(prop)
+  C0 = is_leaf_custom(prop)
+  C1 = isempty(fieldnames(typeof(prop)))
+  C2 = (prop isa ft.stop_recursion_types[1])
+  C3 = (prop isa SArray)
+  C4 = isbits(prop)
+  C5 = s isa Tuple
+  return isleaf(C0,C1,C2,C3,C4,C5)
+end
+
+function get_val_from_var(var::AbstractString)
+  e = Meta.parse(var)
+  if isbits(e) # var = "2.0" (for example)
+    val = e
+  else # var = "FreeParameter(...)" (for example)
+    val = eval(e.args[1].args[1])(e.args[2:end]...)
+  end
+  return val
 end

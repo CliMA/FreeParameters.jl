@@ -8,7 +8,7 @@ mkpath(output)
   gmodel = generic_type(Params, pmodel)
   subfolder = joinpath(output, "EntireStruct")
 
-  export_struct(gmodel, subfolder, EntireStruct(), FolderStructure(), filename)
+  export_struct(gmodel, FolderStructure(subfolder, filename), EntireStruct())
 
   @FreeParameter(gmodel.x, Distributions.Normal)
   @FreeParameter(gmodel.a.x)
@@ -33,7 +33,7 @@ end
   @FreeParameter(gmodel.a.x)
   @FreeParameter(gmodel.a.i)
 
-  export_struct(gmodel, subfolder, FreeParametersOnly(), FolderStructure(), filename)
+  export_struct(gmodel, FolderStructure(subfolder, filename), FreeParametersOnly())
 
   @test ispath(subfolder)
   @test ispath(joinpath(subfolder,"Foo"))
