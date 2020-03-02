@@ -8,7 +8,8 @@ mkpath(output)
   gmodel = generic_type(Params, pmodel)
 
   # export gmodel
-  export_struct(gmodel, joinpath(output,"EntireStruct"), EntireStruct(), FolderStructure(), filename)
+  fs = FolderStructure(joinpath(output,"EntireStruct"), filename)
+  export_struct(gmodel, fs, EntireStruct())
 
   # Change gmodel
   gmodel.a.x = 200.0
@@ -16,7 +17,7 @@ mkpath(output)
   gmodel.x   = 200.0
 
   # Import gmodel
-  import_struct(gmodel, joinpath(output,"EntireStruct"), EntireStruct(), FolderStructure(), filename)
+  import_struct(gmodel, fs, EntireStruct())
 
   # pmodel should match gmodel
   @test pmodel.a.x ≈ gmodel.a.x
@@ -32,14 +33,15 @@ end
   @FreeParameter(gmodel.a.i)
 
   # export gmodel
-  export_struct(gmodel, joinpath(output,"FreeParametersOnly"), FreeParametersOnly(), FolderStructure(), filename)
+  fs = FolderStructure(joinpath(output,"FreeParametersOnly"), filename)
+  export_struct(gmodel, fs, FreeParametersOnly())
 
   # Change gmodel
   gmodel.a.i.val = 2*gmodel.a.i.val
   gmodel.x.val   = 2*gmodel.x.val
 
   # Import gmodel
-  import_struct(gmodel, joinpath(output,"FreeParametersOnly"), FreeParametersOnly(), FolderStructure(), filename)
+  import_struct(gmodel, fs, FreeParametersOnly())
 
   # pmodel should match gmodel
   @test pmodel.a.x ≈ gmodel.a.x

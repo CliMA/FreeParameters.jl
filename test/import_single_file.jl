@@ -8,14 +8,14 @@ mkpath(output)
   gmodel = generic_type(Params, pmodel)
 
   file = joinpath(output, "NoFPEntireStruct.jl")
-  @export_struct(gmodel, file, EntireStruct(), SingleFile())
+  @export_struct(gmodel, SingleFile(file), EntireStruct())
 
   # Manually adjust file:
   contents = "gmodel.x = 500.0\ngmodel.a.x = 500.0\ngmodel.a.i = 500\ngmodel.a.fb.x = 500.0\ngmodel.a.fb.i = 500\n"
   open(file, "w") do io
     print(io, contents)
   end
-  @import_struct(gmodel, file, EntireStruct(), SingleFile())
+  @import_struct(gmodel, SingleFile(file), EntireStruct())
   @test gmodel.x      ≈ 500.0
   @test gmodel.x      ≈ 500.0
   @test gmodel.a.x    ≈ 500.0
@@ -25,7 +25,7 @@ mkpath(output)
 
   file = joinpath(output, "NoFPFreeParametersOnly.jl")
   qmodel = deepcopy(gmodel)
-  @import_struct(gmodel, file, FreeParametersOnly(), SingleFile())
+  @import_struct(gmodel, SingleFile(file), FreeParametersOnly())
   @test is_approx(qmodel, gmodel)
 end
 
@@ -37,7 +37,7 @@ end
   @FreeParameter(gmodel.a.x)
 
   file = joinpath(output, "WithFPEntireStruct.jl")
-  @export_struct(gmodel, file, EntireStruct(), SingleFile())
+  @export_struct(gmodel, SingleFile(file), EntireStruct())
 
   # Manually adjust file:
   contents = "gmodel.x = FreeParameter{Float64,UnionAll,Nothing}(500, Normal, nothing)
@@ -50,7 +50,7 @@ gmodel.a.fb.i = 500
     print(io, contents)
   end
 
-  @import_struct(gmodel, file, EntireStruct(), SingleFile())
+  @import_struct(gmodel, SingleFile(file), EntireStruct())
   @test gmodel.x.val   ≈ 500
   @test gmodel.a.x.val ≈ 500
   @test gmodel.a.i     ≈ 500
@@ -64,7 +64,7 @@ gmodel.a.fb.i = 500
   @FreeParameter(gmodel.a.x)
 
   file = joinpath(output, "WithFPFreeParametersOnly.jl")
-  @export_struct(gmodel, file, FreeParametersOnly(), SingleFile())
+  @export_struct(gmodel, SingleFile(file), FreeParametersOnly())
 
   # Manually adjust file:
   contents = "gmodel.x = FreeParameter{Int64,Symbol,Symbol}(500, :Normal, :nothing)
@@ -74,7 +74,7 @@ gmodel.a.x = FreeParameter{Int64,Symbol,Symbol}(500, :nothing, :nothing)
     print(io, contents)
   end
 
-  @import_struct(gmodel, file, FreeParametersOnly(), SingleFile())
+  @import_struct(gmodel, SingleFile(file), FreeParametersOnly())
 
   @test gmodel.x.val   ≈ 500
   @test gmodel.a.x.val ≈ 500
