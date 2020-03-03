@@ -11,7 +11,6 @@ function export_dict(D::Dict, outstyle::SingleFile, ft::AbstractFilterTypes=Enti
       for (k,v) in D
         if triggers(is_leaf(nothing, v))
 
-
           println(io, "$k = $v")
         end
       end

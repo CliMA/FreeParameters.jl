@@ -26,16 +26,15 @@ get_value(s::FreeParameter) = s.val
 
 function _instantiate(s::T, D::Dict, is_leaf::F, _basename::S) where {T,F<:Function,S<:AbstractString}
   cond_s = is_leaf(nothing, s)
-  if triggers(cond_s) || T<:FPTYPES
+  if T <: Function
+    return s
+  elseif triggers(cond_s) || T<:FPTYPES
     s_active = haskey(D, _basename) ? D[_basename] : s
     cond_D = is_leaf(nothing, s_active)
-    if haskey(D, _basename) && aux_leaf(cond_D)
-      return get_value(D[_basename])
-    else
-      return s
-    end
+    cond = haskey(D, _basename) && aux_leaf(cond_D)
+    return cond ? get_value(D[_basename]) : s
   else
     props_new = [_instantiate(getproperty(s, fn), D, is_leaf, _basename*"."*string(fn)) for fn in fieldnames(T)]
-    return T(props_new...)
+    return T <: Tuple ? T(props_new) : T(props_new...)
   end
 end
