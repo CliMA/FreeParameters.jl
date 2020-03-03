@@ -33,28 +33,12 @@ end
 #####
 
 """
-    extract_free_parameters!(fp::Vector{FreeParameter}, s)
+    extract_free_parameters!(fp::Vector{FreeParameter}, D::Dict)
 
-Recursively extract a vector of `FreeParameter`'s
-from the struct `s`.
+Extract a vector of `FreeParameter`'s from the dict `D`.
 """
-function extract_free_parameters!(fp::Vector{FreeParameter}, s)
-  for fn in fieldnames(typeof(s))
-    p = getproperty(s,fn)
-    if typeof(p) <: FreeParameter
-      push!(fp, p)
-    else
-      extract_free_parameters!(fp, p)
-    end
-  end
-  return nothing
-end
+extract_free_parameters(D::Dict) = FreeParameter[v for v in values(D) if typeof(v) <: FreeParameter]
 
-function extract_free_parameters(s)
-  fp = FreeParameter[]
-  extract_free_parameters!(fp, s)
-  return fp
-end
 
 #####
 ##### Annotating free parameters
