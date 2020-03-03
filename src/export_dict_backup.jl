@@ -18,11 +18,11 @@ with the same structure as `s`.
 """
 function export_dict(D::Dict,
                      s::T,
-                     et::AbstractFilterTypes,
+                     ft::AbstractFilterTypes,
                      outstyle::SingleFile) where {S,T}
   _basename = first(split(first(keys(D)), "."))
 
-  is_leaf(s, prop) = __is_leaf(s, prop, leaf_filter(et), ft)
+  is_leaf(s, prop) = __is_leaf(s, prop, ft)
 
   open(outstyle.filename,"w") do io
     export_dict_single_file(io, D, s, is_leaf, _basename)
@@ -37,7 +37,7 @@ function export_dict_single_file(io,
   fns = fieldnames(T)
   for fn in fns
     prop = getproperty(s, fn)
-    if any(is_leaf(s, prop))
+    if triggers(is_leaf(s, prop))
       k = _basename*"."*string(fn)
       println(io, "$k = $(D[k])")
     else
@@ -46,11 +46,11 @@ function export_dict_single_file(io,
   end
 end
 
-function export_dict_alternative(D::Dict, et::AbstractFilterTypes, outstyle::SingleFile)
-  is_leaf(s, prop) = __is_leaf(s, prop, leaf_filter(et), ft)
+function export_dict_alternative(D::Dict, ft::AbstractFilterTypes, outstyle::SingleFile)
+  is_leaf(s, prop) = __is_leaf(s, prop, ft)
   open(outstyle.filename,"w") do io
     for (k,v) in D
-      any(is_leaf(nothing, v)) && println(io, "$k = $v")
+      triggers(is_leaf(nothing, v)) && println(io, "$k = $v")
     end
   end
 end
@@ -62,7 +62,7 @@ end
 get_path(prop_chain) = joinpath(split(prop_chain, ".")[1:end-1]...)
 get_varname(prop_chain) = split(prop_chain, ".")[end]
 
-function export_dict(D::Dict, et::AbstractFilterTypes, outstyle::FolderStructure)
+function export_dict(D::Dict, ft::AbstractFilterTypes, outstyle::FolderStructure)
   mkpath(outstyle.root_folder)
   D_paths = Dict([get_path(k) => [] for k in keys(D)])
   for (k,v) in D
@@ -82,7 +82,7 @@ function export_dict(D::Dict, et::AbstractFilterTypes, outstyle::FolderStructure
   end
 end
 
-function export_dict(D::Dict, et::AbstractFilterTypes, outstyle::SingleFile)
+function export_dict(D::Dict, ft::AbstractFilterTypes, outstyle::SingleFile)
   open(outstyle.filename, "w") do io
     for (k,v) in D
       println(io, "$k = $v")
