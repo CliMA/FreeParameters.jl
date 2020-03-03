@@ -11,7 +11,6 @@ function import_dict(D::Dict, outstyle::SingleFile, ft::AbstractFilterTypes=Enti
       for (k,v) in D
         if triggers(is_leaf(nothing, v))
           val_s = strip(last(split(readline(io), "=")), ' ')
-
           D[k] = get_val_from_var(val_s)
         end
       end
