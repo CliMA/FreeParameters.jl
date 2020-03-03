@@ -1,4 +1,3 @@
-using SyntaxTree
 using StaticArrays
 
 export FreeParameter, @FreeParameter
@@ -115,17 +114,6 @@ Convenience constructor for including entire struct/dict etc.
 """
 EntireStruct() = ExcludeTypes((Any,), (FreeParameter,))
 
-function __is_leaf_old(s, prop, ft::IncludeTypes)
-  C0 = any([prop isa t for t in ft.include_types])
-  C1 = any([prop isa t for t in ft.stop_recursion_types])
-  return (C0,C1)
-end
-function __is_leaf_old(s, prop, ft::ExcludeTypes)
-  C0 = isbits(prop)
-  C1 = any([prop isa t for t in ft.stop_recursion_types])
-  return (C0,C1)
-end
-
 struct leaf_triggers{B,AFT}
   ft::AFT
   s
@@ -139,8 +127,12 @@ end
 
 triggers(t::Tuple) = any(t)
 
-aux_leaf(lt::leaf_triggers{Bool,IncludeTypes}) = any([lt.prop isa t for t in lt.ft.stop_recursion_types]) || any([lt.prop isa t for t in lt.ft.include_types])
-aux_leaf(lt::leaf_triggers{Bool,ExcludeTypes}) = any([lt.prop isa t for t in lt.ft.stop_recursion_types]) || isbits(lt.prop)
+function aux_leaf(lt::leaf_triggers{Bool,IncludeTypes})
+  return any([lt.prop isa t for t in lt.ft.stop_recursion_types]) || any([lt.prop isa t for t in lt.ft.include_types])
+end
+function aux_leaf(lt::leaf_triggers{Bool,ExcludeTypes})
+  return any([lt.prop isa t for t in lt.ft.stop_recursion_types]) || isbits(lt.prop)
+end
 
 triggers(lt::leaf_triggers) = triggers(lt, lt.ft)
 
@@ -178,3 +170,12 @@ function get_val_from_var(var::AbstractString)
   end
   return val
 end
+
+"""
+    get_val(x)
+Gets value of `FreeParameter`,
+otherwise return identity.
+"""
+function get_val end
+get_val(x) = x
+get_val(x::FreeParameter) = x.val
