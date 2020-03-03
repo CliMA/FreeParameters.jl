@@ -106,7 +106,7 @@ end
 
   end
 
-  # Requires fix since SArray is slipping through!
+  # Last bit to get working:
   # import_dict(D, sf, FreeParametersOnly())
   # @test !(D["pmodel.boundarycondition.SHF"] ≈ 500)
   # @test FreeParameters.get_val(D["pmodel.turbulence.C_smag"]) ≈ 500

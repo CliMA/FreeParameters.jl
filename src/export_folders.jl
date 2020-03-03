@@ -11,7 +11,7 @@ Export struct `s` to directory `directory`
 with the same structure as `s`.
 """
 function export_struct(s::T, fs::FolderStructure, ft::AbstractFilterTypes) where {S,T,F<:Function}
-  is_leaf(s, prop) = __is_leaf_old(s, prop, leaf_filter(ft), ft)
+  is_leaf(s, prop) = __is_leaf_old(s, prop, ft)
   return export_struct_folder(s, fs.root_folder, is_leaf, fs.filename)
 end
 
@@ -24,14 +24,14 @@ function export_struct_folder(s::T,
   subdir = fn_parent==nothing ? string(nameof(T)) : joinpath(subdir,string(fn_parent))
   fns = fieldnames(T)
   props = getproperty.(Ref(s), fns)
-  if any(Base.Iterators.flatten(is_leaf.(Ref(s), props)))
+  if any(triggers.(is_leaf.(Ref(s), props)))
     dir_used = joinpath(directory, subdir)
     mkpath(dir_used)
     params = joinpath(dir_used, _filename)
     open(params, "w") do io
       for fn in fns
         prop = getproperty(s, fn)
-        if any(is_leaf(s, prop))
+        if triggers(is_leaf(s, prop))
           println(io, "$fn = $prop")
         end
       end
@@ -40,7 +40,7 @@ function export_struct_folder(s::T,
 
   for fn in fns
     prop = getproperty(s, fn)
-    if !any(is_leaf(s, prop))
+    if !triggers(is_leaf(s, prop))
       export_struct_folder(prop, directory, is_leaf, _filename, subdir, fn)
     end
   end

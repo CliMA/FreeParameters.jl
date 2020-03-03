@@ -115,38 +115,58 @@ Convenience constructor for including entire struct/dict etc.
 """
 EntireStruct() = ExcludeTypes((Any,), (FreeParameter,))
 
-struct isleaf{B}
-  custom::B
-  emptyfieldnames::B
-  isa_stop_recursion_type::B
-  isa_SArray::B
-  isa_isbits::B
-  isa_tuple::B
+function __is_leaf_old(s, prop, ft::IncludeTypes)
+  C0 = any([prop isa t for t in ft.include_types])
+  C1 = any([prop isa t for t in ft.stop_recursion_types])
+  return (C0,C1)
+end
+function __is_leaf_old(s, prop, ft::ExcludeTypes)
+  C0 = isbits(prop)
+  C1 = any([prop isa t for t in ft.stop_recursion_types])
+  return (C0,C1)
 end
 
-Base.any(il::isleaf) = any([il.custom && il.emptyfieldnames,
-                            il.isa_stop_recursion_type,
-                            il.isa_SArray
-                            ])
-
-leaf_filter(ets::ExcludeTypes) = x -> isbits(x)
-leaf_filter(its::IncludeTypes) = x -> any([x isa t for t in its.include_types])
-
-function __is_leaf_old(s, prop, is_leaf_custom, ft::AbstractFilterTypes)
-  C0 = is_leaf_custom(prop)
-  C2 = (prop isa ft.stop_recursion_types[1])
-  return (C0,C2)
+struct leaf_triggers{B,AFT}
+  ft::AFT
+  s
+  prop
+  custom::B                  # C1
+  emptyfieldnames::B         # C2
+  isa_stop_recursion_type::B # C3
+  isa_SArray::B              # C4
+  isa_isbits::B              # C5
 end
 
-function __is_leaf(s, prop, is_leaf_custom, ft::AbstractFilterTypes)
-  C9 = isbits(prop)
-  C0 = is_leaf_custom(prop)
-  C1 = isempty(fieldnames(typeof(prop)))
-  C2 = (prop isa ft.stop_recursion_types[1])
-  C3 = (prop isa SArray)
-  C4 = isbits(prop)
-  C5 = s isa Tuple
-  return isleaf(C0,C1,C2,C3,C4,C5)
+triggers(t::Tuple) = any(t)
+
+aux_leaf(lt::leaf_triggers{Bool,IncludeTypes}) = any([lt.prop isa t for t in lt.ft.stop_recursion_types]) || any([lt.prop isa t for t in lt.ft.include_types])
+aux_leaf(lt::leaf_triggers{Bool,ExcludeTypes}) = any([lt.prop isa t for t in lt.ft.stop_recursion_types]) || isbits(lt.prop)
+
+triggers(lt::leaf_triggers) = triggers(lt, lt.ft)
+
+triggers(lt::leaf_triggers, ft::IncludeTypes) = any([any([lt.prop isa t for t in ft.include_types]) && lt.emptyfieldnames,
+                                                     lt.isa_stop_recursion_type
+                                                     ])
+triggers(lt::leaf_triggers, ft::ExcludeTypes) = any([isbits(lt.prop) && lt.emptyfieldnames,
+                                                     lt.isa_stop_recursion_type,
+                                                     lt.isa_SArray
+                                                     ])
+
+function __is_leaf(s, prop, ft::IncludeTypes)
+  C1 = any([prop isa t for t in ft.include_types])
+  C2 = isempty(fieldnames(typeof(prop)))
+  C3 = any([prop isa t for t in ft.stop_recursion_types])
+  C4 = (prop isa SArray)
+  C5 = isbits(prop)
+  return leaf_triggers(ft, s, prop, C1, C2, C3, C4, C5)
+end
+function __is_leaf(s, prop, ft::ExcludeTypes)
+  C1 = isbits(prop)
+  C2 = isempty(fieldnames(typeof(prop)))
+  C3 = any([prop isa t for t in ft.stop_recursion_types])
+  C4 = (prop isa SArray)
+  C5 = isbits(prop)
+  return leaf_triggers(ft, s, prop, C1, C2, C3, C4, C5)
 end
 
 function get_val_from_var(var::AbstractString)

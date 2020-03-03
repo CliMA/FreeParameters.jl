@@ -24,12 +24,12 @@ end
   @free D["pmodel.x"] Distributions.Normal
   @free D["pmodel.a.x"]
   sf = SingleFile(joinpath(output,"toy_model_fp.jl"))
-  export_dict(D, sf, IncludeTypes((FreeParameter,)))
+  export_dict(D, sf, FreeParametersOnly())
   @test isfile(sf.filename)
   contents = open(f->read(f, String), sf.filename)
   @test contents == "pmodel.a.x = FreeParameter{Float64,Nothing,Nothing}(1.0, nothing, nothing)\npmodel.x = FreeParameter{Float64,UnionAll,Nothing}(3.0, Normal, nothing)\n"
   fs = FolderStructure(joinpath(output,"toy_model_fp"),"params.jl")
-  export_dict(D, fs, IncludeTypes((FreeParameter,)))
+  export_dict(D, fs, FreeParametersOnly())
 end
 
 #####
@@ -57,12 +57,12 @@ end
   @free D["pmodel.boundarycondition.C_drag"]
 
   sf = SingleFile(joinpath(output,"real_model_fp.jl"))
-  export_dict(D, sf, IncludeTypes((FreeParameter,)))
+  export_dict(D, sf, FreeParametersOnly())
   contents = open(f->read(f, String), sf.filename)
-  @test contents == "pmodel.source.2.u_relaxation = Float32[7.0, -5.5, 0.0]\npmodel.turbulence.C_smag = FreeParameter{Float32,UnionAll,Nothing}(0.21f0, Normal, nothing)\npmodel.boundarycondition.C_drag = FreeParameter{Float32,Nothing,Nothing}(0.0011f0, nothing, nothing)\n"
+  @test contents == "pmodel.turbulence.C_smag = FreeParameter{Float32,UnionAll,Nothing}(0.21f0, Normal, nothing)\npmodel.boundarycondition.C_drag = FreeParameter{Float32,Nothing,Nothing}(0.0011f0, nothing, nothing)\n"
   fs = FolderStructure(joinpath(output,"real_model_fp"),"params.jl")
 
-  export_dict(D, fs, IncludeTypes((FreeParameter,)))
-  # @test !ispath(joinpath(fs.root_folder, "pmodel", "source")) # failing
+  export_dict(D, fs, FreeParametersOnly())
+  @test !ispath(joinpath(fs.root_folder, "pmodel", "source"))
 end
 
