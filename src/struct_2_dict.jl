@@ -21,7 +21,7 @@ function add_leaves!(D_full::Dict,
   fns = fieldnames(T)
   for fn in fns
     prop = getproperty(s, fn)
-    if any(is_leaf(s, prop))
+    if triggers(is_leaf(s, prop))
       D_full[_basename*"."*string(fn)] = prop
     else
       add_leaves!(D_full, prop, is_leaf, _basename*"."*string(fn))
@@ -31,7 +31,7 @@ end
 
 function struct_2_dict(s, obj_name::AbstractString; ft::AbstractFilterTypes=EntireStruct())
   D_full = Dict()
-  is_leaf(s, prop) = __is_leaf(s, prop, leaf_filter(EntireStruct()), ft)
+  is_leaf(s, prop) = __is_leaf(s, prop, ft)
   add_leaves!(D_full, s, is_leaf, obj_name)
   return D_full
 end
