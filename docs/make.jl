@@ -21,6 +21,6 @@ makedocs(
 )
 
 deploydocs(
-           repo = "github.com/climate-machine/FreeParameters.jl.git",
+           repo = "github.com/CliMA/FreeParameters.jl.git",
            target = "build",
           )
