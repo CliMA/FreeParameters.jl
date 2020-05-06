@@ -1,5 +1,5 @@
 status = [
-  "climate-machine.FreeParameters.jl"
+  "CliMA.FreeParameters.jl"
 ]
 delete_merged_branches = true
 timeout_sec = 86400

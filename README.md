@@ -10,13 +10,13 @@ Infrastructure for annotating, collecting, and distributing free parameters.
 | **Bors**             | [![Bors enabled][bors-img]][bors-url]         |
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-dev-url]: https://climate-machine.github.io/FreeParameters.jl/dev/
+[docs-dev-url]: https://CliMA.github.io/FreeParameters.jl/dev/
 
-[azure-img]: https://dev.azure.com/climate-machine/FreeParameters.jl/_apis/build/status/climate-machine.FreeParameters.jl?branchName=master
-[azure-url]: https://dev.azure.com/climate-machine/FreeParameters.jl/_build/latest?definitionId=1&branchName=master
+[azure-img]: https://dev.azure.com/CliMA/FreeParameters.jl/_apis/build/status/CliMA.FreeParameters.jl?branchName=master
+[azure-url]: https://dev.azure.com/CliMA/FreeParameters.jl/_build/latest?definitionId=1&branchName=master
 
-[codecov-img]: https://codecov.io/gh/climate-machine/FreeParameters.jl/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/climate-machine/FreeParameters.jl
+[codecov-img]: https://codecov.io/gh/CliMA/FreeParameters.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/CliMA/FreeParameters.jl
 
 [bors-img]: https://bors.tech/images/badge_small.svg
 [bors-url]: https://app.bors.tech/repositories/22860
